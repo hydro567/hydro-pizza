@@ -1,0 +1,485 @@
+<!doctype html>
+<html lang="tr" class="booting">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Hydro — Bugün ne yemek istersin?</title>
+<meta name="description" content="Hydro: pizzanı, burgerini ya da dürümünü kendi elinle hazırla, siparişini ver, sıcak sıcak gelsin.">
+<meta name="theme-color" content="#8f9296">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='15' fill='%23e2b36b'/%3E%3Ccircle cx='16' cy='16' r='11.5' fill='%23c4161c'/%3E%3Ccircle cx='12' cy='12' r='2.6' fill='%23f6ecd6'/%3E%3Ccircle cx='20' cy='14' r='2.6' fill='%23f6ecd6'/%3E%3Ccircle cx='15' cy='21' r='2.6' fill='%23f6ecd6'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Bowlby+One&family=Courier+Prime:wght@400;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=Instrument+Serif:ital@1&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/burger.css">
+<link rel="stylesheet" href="css/three.css">
+<link rel="stylesheet" href="css/checkout.css">
+</head>
+<body>
+<canvas id="gl" aria-hidden="true"></canvas>
+
+<!-- Ortak çizimler -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="logo" viewBox="0 0 1000 480">
+      <path id="logoArc" d="M40 300 Q500 110 960 300" fill="none"/>
+      <text class="wordmark" font-size="262" fill="currentColor">
+        <textPath href="#logoArc" startOffset="50%" text-anchor="middle" textLength="900" lengthAdjust="spacingAndGlyphs">HYDRO</textPath>
+      </text>
+      <path d="M170 392 H330 M670 392 H830" stroke="currentColor" stroke-width="12" stroke-linecap="round"/>
+      <text class="subword" x="500" y="434" font-size="118" text-anchor="middle" letter-spacing="14" fill="currentColor">PİZZA</text>
+    </symbol>
+    <symbol id="basil" viewBox="0 0 200 260" overflow="visible">
+      <path d="M100 8C172 58 194 150 152 212c-18 26-40 40-52 40s-34-14-52-40C6 150 28 58 100 8Z" fill="#c4161c"/>
+      <path d="M100 42V236M100 92 62 66M100 92l38-26M100 142 48 108M100 142l52-34M100 190 62 164M100 190l38-26" stroke="#f3ead9" stroke-width="8" fill="none" stroke-linecap="round"/>
+    </symbol>
+
+    <pattern id="bPaper" width="210" height="150" patternUnits="userSpaceOnUse" patternTransform="rotate(-20)">
+      <rect width="210" height="150" fill="#fbf7ec"/>
+      <text x="8" y="44" font-family="'Bowlby One',Impact,sans-serif" font-size="27" fill="#2529b4">HYDRO</text>
+      <g transform="translate(150 96)" fill="none" stroke="#d9201f" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M-30 -6Q-30 -30 0 -30T30 -6Z"/><path d="M-32 4q8 7 16 0t16 0t16 0t16 0"/><path d="M-30 14H30Q30 24 22 24H-22Q-30 24 -30 14Z"/>
+      </g>
+    </pattern>
+    <symbol id="bBoxArt" viewBox="0 0 1000 640">
+      <path d="M36 36H964L990 548 970 630H30L10 548Z" fill="#c88f0f"/>
+      <path d="M10 548H990L970 630H30Z" fill="#dfa313"/>
+      <path d="M36 36H964L990 548H10Z" fill="#fbc92f"/>
+      <path d="M36 36H964L968 84H32Z" fill="#fdd85b"/>
+      <path d="M36 36 10 548M964 36 990 548" stroke="#d29a12" stroke-width="5"/>
+      <text x="500" y="250" text-anchor="middle" font-family="'Bowlby One',Impact,sans-serif" font-size="150" fill="#2529b4" textLength="520" lengthAdjust="spacingAndGlyphs">HYDRO</text>
+      <text x="500" y="358" text-anchor="middle" font-family="Anton,Impact,sans-serif" font-size="86" letter-spacing="16" fill="#2529b4">BURGER</text>
+      <text x="500" y="462" text-anchor="middle" font-family="'DM Sans',sans-serif" font-weight="700" font-size="34" letter-spacing="6" fill="#d9201f">KATINI SEN SEÇ</text>
+      <g fill="none" stroke="#d9201f" stroke-width="9" stroke-linecap="round" stroke-linejoin="round">
+        <g transform="translate(118 280)"><path d="M-62 -14Q-62 -66 0 -66T62 -14Z" fill="#fdd85b"/><path d="M-66 6q11 12 22 0t22 0t22 0t22 0t22 0t22 0"/><path d="M-62 30H62Q62 52 42 52H-42Q-62 52 -62 30Z" fill="#fdd85b"/><path d="M-28 -44h1M0 -50h1M26 -42h1" stroke-width="10"/><path d="M-84 -74l-18 -18M0 -92v-24M84 -74l18 -18"/></g>
+        <g transform="translate(882 280)"><path d="M-62 -14Q-62 -66 0 -66T62 -14Z" fill="#fdd85b"/><path d="M-66 6q11 12 22 0t22 0t22 0t22 0t22 0t22 0"/><path d="M-62 30H62Q62 52 42 52H-42Q-62 52 -62 30Z" fill="#fdd85b"/><path d="M-28 -44h1M0 -50h1M26 -42h1" stroke-width="10"/><path d="M-84 -74l-18 -18M0 -92v-24M84 -74l18 -18"/></g>
+      </g>
+    </symbol>
+  </defs>
+</svg>
+
+<!-- Seçim ekranı -->
+<section class="chooser" id="chooser">
+  <canvas class="choose-counter" id="chooseCounter" aria-hidden="true"></canvas>
+  <svg class="choose-logo" viewBox="0 0 1000 300" aria-label="Hydro" role="img">
+    <path id="chooseArc" d="M40 280 Q500 100 960 280" fill="none"/>
+    <text class="wordmark" font-size="262" fill="currentColor"><textPath href="#chooseArc" startOffset="50%" text-anchor="middle" textLength="900" lengthAdjust="spacingAndGlyphs">HYDRO</textPath></text>
+  </svg>
+  <h1>Bugün ne yemek <em>istersin?</em></h1>
+  <div class="picks">
+    <button class="pick pick-pizza" type="button" data-go="pizza" data-press>
+      <span class="pick-art" id="pickPizzaArt"></span>
+      <span class="pick-name">Pizza</span>
+      <span class="pick-sub">Malzemeni at, fırına verelim.</span>
+    </button>
+    <button class="pick pick-burger" type="button" data-go="hamburger" data-press>
+      <span class="pick-art" id="pickBurgerArt"></span>
+      <span class="pick-name">Hamburger</span>
+      <span class="pick-sub">Katını sen seç, kutuyu biz kapatalım.</span>
+    </button>
+    <button class="pick pick-doner" type="button" data-go="doner" data-press>
+      <span class="pick-art" id="pickDonerArt"></span>
+      <span class="pick-name">Dürüm</span>
+      <span class="pick-sub">Etini seç, lavaşı önünde saralım.</span>
+    </button>
+  </div>
+</section>
+
+<main class="stage" id="stage" data-state="hero" hidden>
+  <canvas class="counter" id="counter" aria-hidden="true"></canvas>
+  <canvas class="cloth" id="cloth" aria-hidden="true"></canvas>
+
+  <!-- Üst şerit -->
+  <header class="brand">
+    <a class="logo" href="#" data-home aria-label="Yemek seçimine dön" data-press>
+      <svg viewBox="0 0 1000 480" aria-hidden="true"><use href="#logo"/></svg>
+    </a>
+    <p class="note tagnote">Hamuru taze. Fırını sıcak.<br>Tarifi senin.</p>
+  </header>
+  <button class="note topnote" id="topNote" type="button" data-press>Siparişe başla <span aria-hidden="true">↗</span></button>
+
+  <button class="note home-link" type="button" data-home data-press>← Ne yesem?</button>
+
+  <!-- Malzemeler -->
+  <section class="tray" id="tray" aria-labelledby="trayTitle">
+    <h2 id="trayTitle">Kendine göre yap.</h2>
+    <p class="tray-hint"><span class="only-mouse">Malzemeyi pizzanın üstüne sürükle. Ya da dokun.</span><span class="only-touch">Eklemek için malzemeye dokun.</span></p>
+    <div class="tiles" id="tiles"></div>
+  </section>
+
+  <!-- Kutu -->
+  <section class="boxwrap" id="boxwrap" aria-label="Pizza kutusu">
+    <canvas class="box-inside" id="boxInside" aria-hidden="true"></canvas>
+    <div class="pizza" id="pizza">
+      <canvas class="base base-raw" id="baseRaw" aria-hidden="true"></canvas>
+      <canvas class="base base-baked" id="baseBaked" aria-hidden="true"></canvas>
+      <div class="layers" id="layers" role="img" aria-label="Hazırladığın pizza"></div>
+      <div class="drop-ring" aria-hidden="true"></div>
+      <div class="oven-glow" aria-hidden="true"></div>
+      <i class="steam s1" aria-hidden="true"></i><i class="steam s2" aria-hidden="true"></i><i class="steam s3" aria-hidden="true"></i>
+    </div>
+
+    <button class="lid" id="lid" type="button" aria-label="Kutuyu aç ve siparişe başla" data-press>
+      <svg viewBox="0 0 1000 1000" aria-hidden="true">
+        <!-- karton -->
+        <rect x="0" y="0" width="1000" height="1000" rx="10" fill="#c79a62"/>
+        <rect x="14" y="12" width="972" height="972" rx="6" fill="#f0e6d3"/>
+        <path d="M14 984H986" stroke="#b58a54" stroke-width="5"/>
+        <g fill="#a87f4b"><rect x="0" y="210" width="10" height="130"/><rect x="0" y="660" width="10" height="130"/><rect x="990" y="210" width="10" height="130"/><rect x="990" y="660" width="10" height="130"/></g>
+        <path d="M430 1000q70 -44 140 0z" fill="#a87f4b"/>
+
+        <!-- Maskot: üç dişli domates -->
+        <g transform="translate(205 228) scale(.9)" fill="none" stroke="#c4161c" stroke-width="10" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M-70 18C-122 -8 -128 -48 -118 -66M-112 -80l-12 16M-104 -76l-8 22"/>
+          <path d="M70 26C104 26 120 14 132 2"/>
+          <path d="M-32 84-40 136h-32M32 84 40 136h32"/>
+          <path d="M136 -150V128M104 -176v44q0 26 32 26t32 -26v-44M136 -194v50M104 -176l-12 18M104 -176l12 18M168 -176l-12 18M168 -176l12 18M136 -194l-13 20M136 -194l13 20"/>
+          <circle r="86" fill="#f3ead9"/>
+          <path d="M0 -84c-16 -22 -48 -26 -60 -14c18 2 26 10 30 20c-16 -2 -28 6 -32 18c20 -10 40 -12 62 -24c22 12 42 14 62 24c-4 -12 -16 -20 -32 -18c4 -10 12 -18 30 -20c-12 -12 -44 -8 -60 14Z" fill="#c4161c" stroke-width="4"/>
+          <path d="M-58 22c-6 -14 -8 -30 -4 -44M62 42c10 -10 14 -20 16 -32" stroke-width="7"/>
+          <ellipse cx="-26" cy="-8" rx="14" ry="19" fill="#fff" stroke-width="7"/><ellipse cx="26" cy="-8" rx="14" ry="19" fill="#fff" stroke-width="7"/>
+          <circle cx="-22" cy="-5" r="7" fill="#c4161c" stroke="none"/><circle cx="30" cy="-5" r="7" fill="#c4161c" stroke="none"/>
+          <path d="M-28 28q28 34 56 0q-28 8 -56 0Z" fill="#c4161c" stroke-width="7"/>
+        </g>
+
+        <!-- Dalga üstünde pizza -->
+        <g transform="translate(535 170) scale(.92)" fill="none" stroke="#c4161c" stroke-width="10" stroke-linecap="round">
+          <circle r="92"/><circle r="68" fill="#c4161c" stroke="none"/>
+          <g fill="#f3ead9" stroke="none"><circle cx="-26" cy="-24" r="14"/><circle cx="24" cy="-30" r="11"/><circle cx="32" cy="16" r="15"/><circle cx="-14" cy="28" r="13"/><circle cx="-42" cy="12" r="7"/></g>
+          <path d="M-128 -62l-22 -14M-140 -14h-26M128 -62l22 -14M140 -14h26M-70 -116l-14 -22M70 -116l14 -22M0 -130v-26" stroke-width="8"/>
+          <path d="M-168 126q30 -36 60 0t60 0t60 0t60 0t60 0t60 0" stroke-width="12"/>
+          <path d="M-122 158q24 -28 49 0t49 0t49 0t49 0t49 0" stroke-width="8"/>
+        </g>
+
+        <use href="#basil" width="150" height="195" transform="translate(790 70) rotate(26 75 97)"/>
+        <use href="#basil" width="110" height="143" transform="translate(735 225) rotate(-52 55 71)"/>
+
+        <g fill="#c4161c">
+          <circle cx="70" cy="110" r="7"/><circle cx="100" cy="72" r="5"/><circle cx="52" cy="390" r="6"/><circle cx="388" cy="70" r="6"/><circle cx="700" cy="72" r="5"/><circle cx="944" cy="350" r="7"/><circle cx="900" cy="400" r="5"/><circle cx="660" cy="350" r="5"/><circle cx="40" cy="660" r="5"/><circle cx="960" cy="640" r="5"/><circle cx="228" cy="900" r="6"/><circle cx="744" cy="920" r="6"/><circle cx="300" cy="945" r="4"/>
+        </g>
+
+        <!-- Yazı -->
+        <path id="lidArc" d="M74 622 Q500 470 926 622" fill="none"/>
+        <text class="wordmark" font-size="200" fill="#c4161c">
+          <textPath href="#lidArc" startOffset="50%" text-anchor="middle" textLength="850" lengthAdjust="spacingAndGlyphs">HYDRO</textPath>
+        </text>
+        <text class="subword" x="500" y="688" text-anchor="middle" font-size="78" letter-spacing="20" fill="#c4161c">PİZZA</text>
+        <path d="M170 662H345M655 662H830" stroke="#c4161c" stroke-width="10" stroke-linecap="round"/>
+
+        <g class="lid-cta">
+          <rect x="262" y="702" width="476" height="96" rx="22" fill="none" stroke="#c4161c" stroke-width="9"/>
+          <rect x="274" y="714" width="452" height="72" rx="14" fill="none" stroke="#c4161c" stroke-width="3"/>
+          <text class="subword" x="500" y="768" text-anchor="middle" font-size="50" letter-spacing="4" fill="#c4161c">SİPARİŞİNİ BAŞLAT</text>
+        </g>
+        <text x="500" y="846" text-anchor="middle" font-family="'DM Sans',sans-serif" font-weight="700" font-size="26" letter-spacing="6" fill="#c4161c">FIRINDAN TAZE · KAPINA SICAK</text>
+
+        <use href="#basil" width="170" height="221" transform="translate(40 730) rotate(-58 85 110)"/>
+        <use href="#basil" width="100" height="130" transform="translate(205 835) rotate(70 50 65)"/>
+
+        <!-- Dilim -->
+        <g transform="translate(838 806) rotate(28)" stroke="#c4161c" stroke-width="9" stroke-linejoin="round" stroke-linecap="round">
+          <path d="M-74 -96Q0 -128 74 -96L0 124Z" fill="#f3ead9"/>
+          <path d="M-74 -96Q0 -128 74 -96L62 -66Q0 -92 -62 -66Z" fill="#c4161c"/>
+          <circle cx="-14" cy="-36" r="17" fill="#c4161c"/><circle cx="24" cy="-2" r="14" fill="#c4161c"/><circle cx="-6" cy="44" r="12" fill="#c4161c"/>
+          <path d="M-26 8l-2 20M44 -42l-2 16" fill="none" stroke-width="7"/>
+        </g>
+      </svg>
+      <span class="lid-grain" aria-hidden="true"></span>
+      <span class="sticker" id="sticker" aria-hidden="true"></span>
+    </button>
+  </section>
+
+  <p class="strip" id="strip"><span id="stripText">Pizza senin, kural senin.</span> <button type="button" id="restart" data-press>Baştan başla</button></p>
+
+  <!-- Karşılama kartı -->
+  <aside class="card hero-card" id="heroCard">
+    <p class="open"><i aria-hidden="true"></i> İyi pizza için açığız</p>
+    <h1>Hamuru bizden.<br>Gerisi <em>senden.</em></h1>
+    <p class="lead">Sevdiğin malzemeler, bizim hamurumuz. Pizzanı kendi elinle yap, gerisini fırına bırak.</p>
+    <button class="cta" id="startBtn" type="button" data-press>Hadi pizza yapalım <span aria-hidden="true">↗</span></button>
+    <dl>
+      <div><dt>Teslimat &amp; gel-al</dt><dd>Fırından doğruca kapına</dd></div>
+      <div><dt>Her gün, <span id="hoursText"></span></dt><dd>Mahallenin pizzacısı</dd></div>
+    </dl>
+  </aside>
+
+  <!-- Fiş -->
+  <aside class="receipt" id="receipt" aria-label="Sipariş fişi">
+    <div class="receipt-paper">
+      <svg class="receipt-logo" viewBox="0 0 1000 480" aria-hidden="true"><use href="#logo"/></svg>
+      <p class="r-sub">SENİN USULÜN</p>
+      <p class="r-title">Başyapıtın</p>
+      <hr>
+      <div class="r-line"><span id="baseName">30 cm Normal Hamur</span><span id="basePrice"></span></div>
+      <p class="r-small">Domates soslu taban</p>
+      <fieldset class="r-how r-opt">
+        <legend>Hamur</legend>
+        <label data-press><input type="radio" name="dough" value="ince"><i></i> İnce</label>
+        <label data-press><input type="radio" name="dough" value="normal" checked><i></i> Normal</label>
+        <label data-press><input type="radio" name="dough" value="kalin"><i></i> Kalın +25</label>
+      </fieldset>
+      <fieldset class="r-how r-opt">
+        <legend>Pişirme</legend>
+        <label data-press><input type="radio" name="done" value="az"><i></i> Az</label>
+        <label data-press><input type="radio" name="done" value="orta" checked><i></i> Orta</label>
+        <label data-press><input type="radio" name="done" value="cok"><i></i> Çok</label>
+      </fieldset>
+      <div id="rItems" aria-live="polite"></div>
+      <p class="r-empty" id="rEmpty">Şimdilik bomboş bir tuval.<br>Asıl lezzet birazdan geliyor.</p>
+      <hr>
+      <fieldset class="r-how">
+        <legend>Nasıl alacaksın?</legend>
+        <label data-press><input type="radio" name="how" value="delivery" checked><i></i> Teslimat</label>
+        <label data-press><input type="radio" name="how" value="pickup"><i></i> Gel-al</label>
+      </fieldset>
+      <div class="r-line r-fee"><span>Teslimat</span><span id="feePrice"></span></div>
+      <div class="r-line r-total"><span>Toplam</span><strong id="total" aria-live="polite"></strong></div>
+      <button class="cta place" id="placeBtn" type="button" data-press><span id="placeText">Siparişi ver</span> <span class="arr" aria-hidden="true">↗</span></button>
+      <p class="r-foot">Afiyet olsun.<br>Hamur dinlendi, sıra sende.</p>
+      <div class="barcode" id="barcode" aria-hidden="true"></div>
+    </div>
+  </aside>
+
+  <!-- Fırın sayacı -->
+  <section class="timer" id="timer" aria-label="Fırın sayacı">
+    <svg viewBox="0 0 240 240" aria-hidden="true">
+      <defs>
+        <radialGradient id="tBody" cx=".38" cy=".3" r=".8"><stop offset="0" stop-color="#ff5a4c"/><stop offset=".55" stop-color="#d31518"/><stop offset="1" stop-color="#7a0509"/></radialGradient>
+        <radialGradient id="tFace" cx=".45" cy=".4" r=".7"><stop offset="0" stop-color="#fffdf6"/><stop offset="1" stop-color="#e3d9c4"/></radialGradient>
+        <linearGradient id="tKnob" x1="0" x2="1"><stop offset="0" stop-color="#8d9196"/><stop offset=".45" stop-color="#f4f5f6"/><stop offset="1" stop-color="#70747a"/></linearGradient>
+      </defs>
+      <circle cx="120" cy="124" r="112" fill="#000" opacity=".28"/>
+      <circle cx="120" cy="118" r="110" fill="url(#tBody)"/>
+      <circle cx="120" cy="118" r="82" fill="url(#tFace)" stroke="#8a0a0d" stroke-width="3"/>
+      <g id="timerTicks" stroke="#2a2422" stroke-linecap="round"></g>
+      <g id="timerDial">
+        <rect x="109" y="46" width="22" height="72" rx="10" fill="url(#tKnob)" stroke="#55585c" stroke-width="1.5"/>
+        <circle cx="120" cy="118" r="24" fill="url(#tKnob)" stroke="#55585c" stroke-width="1.5"/>
+        <path d="M120 40v22" stroke="#c4161c" stroke-width="5" stroke-linecap="round"/>
+      </g>
+    </svg>
+    <p class="note">Fırında</p>
+    <p class="note time" id="timerText" role="timer">00:05</p>
+  </section>
+
+  <!-- Sipariş tamam -->
+  <aside class="card done-card" id="doneCard" aria-live="polite">
+    <svg class="check" viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="21" fill="none" stroke="currentColor" stroke-width="3"/><path d="M14 25l7 7 13-15" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <h2>Damak tadın<br><em>yerinde.</em></h2>
+    <p class="lead" id="doneLead"></p>
+    <hr>
+    <p class="order-no" id="doneNo"></p>
+    <p class="arrive" id="doneArrive"></p>
+    <button class="cta" id="againBtn" type="button" data-press>Yeni pizza yap <span aria-hidden="true">↺</span></button>
+  </aside>
+</main>
+
+
+<!-- Hamburger -->
+<main class="bstage" id="bstage" data-bstate="hero" hidden>
+  <canvas class="b-counter" id="bCounter" aria-hidden="true"></canvas>
+  <div class="b-band top"></div><div class="b-band bot"></div>
+
+  <header class="b-head">
+    <a class="b-logo" href="#" data-home aria-label="Yemek seçimine dön" data-press>
+      <svg viewBox="0 0 1000 480" aria-hidden="true">
+        <path id="bLogoArc" d="M40 300 Q500 110 960 300" fill="none"/>
+        <text class="wordmark" font-size="262" fill="currentColor"><textPath href="#bLogoArc" startOffset="50%" text-anchor="middle" textLength="900" lengthAdjust="spacingAndGlyphs">HYDRO</textPath></text>
+        <text class="subword" x="500" y="434" font-size="118" text-anchor="middle" letter-spacing="14" fill="currentColor">BURGER</text>
+      </svg>
+    </a>
+    <p class="b-tagline">SMASH BURGER.<br>SENİN ELİNDEN.</p>
+  </header>
+  <button class="b-howbtn" id="bHow" type="button" aria-expanded="false" aria-controls="bHowPop" data-press>Nasıl çalışır <i aria-hidden="true">?</i></button>
+  <div class="b-howpop" id="bHowPop" hidden>
+    <ol>
+      <li>Malzemeyi kutuya sürükle ya da tıkla.</li>
+      <li>Aynı malzemeyi yine ekle, fişe ekstra yazılsın.</li>
+      <li>Üstünü kapat, sonra patates ve içecek seç.</li>
+    </ol>
+  </div>
+  <button class="b-home" type="button" data-home data-press>← Ne yesem?</button>
+
+  <section class="b-hero" id="bHero">
+    <h1>Katını sen seç. Izgarası bizde.</h1>
+    <p>Ekmekten sosa her kat senden. Sen kur, kutuyu biz kapatalım.</p>
+  </section>
+  <button class="b-pill b-open-btn" id="bOpenBtn" type="button" data-press>Kutuyu aç <span aria-hidden="true">↗</span></button>
+
+  <section class="b-bottles" id="bBottles" aria-label="Soslar"><div class="b-bottles-in" id="bBottlesIn"></div></section>
+
+  <section class="b-tubs" id="bTubs" aria-label="Malzemeler">
+    <h2 class="b-ribbon">Kendin kur.</h2>
+    <div class="b-tubs-in" id="bTubsIn"></div>
+  </section>
+
+  <section class="b-sides" id="bSides" aria-label="Yan ürünler">
+    <h2 class="b-ribbon">Yanına ne gitsin?</h2>
+    <div class="b-sides-list" id="bSidesList"></div>
+  </section>
+
+  <section class="b-boxwrap" aria-label="Burger kutusu">
+    <div class="b-box" id="bBox">
+      <svg viewBox="0 0 1000 640" aria-hidden="true">
+        <path d="M60 10H940L972 150H28Z" fill="#e2a817"/>
+        <path d="M60 10H940L948 40H52Z" fill="#fbc92f"/>
+        <path d="M28 150H972L990 548 970 630H30L10 548Z" fill="#fbc92f"/>
+        <path d="M58 170H942L956 540H44Z" fill="#b57f0e"/>
+        <rect x="70" y="186" width="425" height="340" fill="url(#bPaper)"/>
+        <rect x="521" y="186" width="412" height="340" fill="url(#bPaper)"/>
+        <path d="M70 186H495V226H70ZM521 186H933V226H521Z" fill="rgba(50,30,5,.22)"/>
+        <rect x="495" y="170" width="26" height="370" fill="#fbc92f"/><rect x="495" y="170" width="5" height="370" fill="#d89f13"/>
+        <path d="M10 548H990L970 630H30Z" fill="#f0b81f"/>
+        <path d="M44 540H956L990 548H10Z" fill="#ffdc63"/>
+      </svg>
+      <div class="b-sidebox">
+        <p class="b-placard" id="bPlacard">Yanına küçük<br>bir şey?</p>
+        <div class="b-sides-in" id="bSidesIn"></div>
+      </div>
+      <div class="b-stack" id="bStack"></div>
+    </div>
+    <button class="b-lid" id="bLid" type="button" aria-label="Kutuyu aç" data-press>
+      <svg viewBox="0 0 1000 640" aria-hidden="true"><use href="#bBoxArt"/></svg>
+      <span class="b-sticker" id="bSticker" aria-hidden="true"></span>
+    </button>
+  </section>
+
+  <aside class="b-receipt" id="bReceipt" aria-label="Sipariş fişi">
+    <div class="b-paper">
+      <h2>HYDRO BURGER</h2>
+      <p class="r-sub">ÇOK İYİ BİR SİPARİŞ</p>
+      <hr>
+      <div id="bItems" aria-live="polite"></div>
+      <div class="r-line" id="bFeeLine" hidden><span>Teslimat</span><span id="bFee"></span></div>
+      <hr>
+      <div class="r-line r-total"><span>TOPLAM</span><strong id="bTotal"></strong></div>
+      <fieldset class="r-how">
+        <legend>Nasıl alacaksın?</legend>
+        <label data-press><input type="radio" name="bhow" value="pickup" checked><i></i> Gel-al</label>
+        <label data-press><input type="radio" name="bhow" value="delivery"><i></i> Teslimat</label>
+      </fieldset>
+      <button class="b-pill" id="bCheckout" type="button" data-press>Siparişi ver <span aria-hidden="true">↗</span></button>
+      <button class="b-back" id="bBack" type="button" data-press>← Kurmaya dön</button>
+    </div>
+  </aside>
+
+  <aside class="b-done" id="bDone" aria-live="polite">
+    <svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="21" fill="none" stroke="currentColor" stroke-width="3"/><path d="M14 25l7 7 13-15" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <h2>Kat kat,<br>tam kıvamında.</h2>
+    <p class="lead" id="bDoneLead"></p>
+    <hr>
+    <p class="order-no" id="bDoneNo"></p>
+    <p class="arrive" id="bDoneArrive"></p>
+    <button class="b-pill" id="bAgain" type="button" data-press>Yeni burger kur <span aria-hidden="true">↺</span></button>
+  </aside>
+
+  <div class="b-status" id="bStatus">
+    <span class="b-status-text" id="bStatusText"></span>
+    <button class="b-pill" id="bTopOff" type="button" data-press>Üstünü kapat <span aria-hidden="true">↗</span></button>
+    <button class="b-undo" id="bUndo" type="button" data-press>↺ Geri al</button>
+    <span class="b-toast" id="bToast" role="status"></span>
+  </div>
+</main>
+
+
+<!-- Döner -->
+<main class="bstage dstage" id="dstage" data-bstate="hero" hidden>
+  <div class="b-band top"></div><div class="b-band bot"></div>
+  <header class="b-head">
+    <a class="b-logo" href="#" data-home aria-label="Yemek seçimine dön" data-press>
+      <svg viewBox="0 0 1000 480" aria-hidden="true">
+        <path id="dLogoArc" d="M40 300 Q500 110 960 300" fill="none"/>
+        <text class="wordmark" font-size="262" fill="currentColor"><textPath href="#dLogoArc" startOffset="50%" text-anchor="middle" textLength="900" lengthAdjust="spacingAndGlyphs">HYDRO</textPath></text>
+        <text class="subword" x="500" y="434" font-size="118" text-anchor="middle" letter-spacing="14" fill="currentColor">DÖNER</text>
+      </svg>
+    </a>
+    <p class="b-tagline">ŞİŞTEN LAVAŞA.<br>SENİN USULÜN.</p>
+  </header>
+  <button class="b-home" type="button" data-home data-press>← Ne yesem?</button>
+
+  <section class="b-hero" id="dHero">
+    <h1>Etini seç. Lavaşı önünde saralım.</h1>
+    <p>Adana, Urfa, et ya da tavuk döner. İçine ne girsin sen söyle, biz sacda kızartıp kağıdına saralım.</p>
+  </section>
+  <button class="b-pill b-open-btn" id="dOpen" type="button" data-press>Dürümünü yap <span aria-hidden="true">↗</span></button>
+
+  <section class="d-panel d-left" id="dMeats" aria-label="Etler">
+    <h2 class="b-ribbon">Etini seç.</h2>
+    <div class="d-grid" id="dMeatList"></div>
+  </section>
+  <section class="d-panel d-right" id="dTops" aria-label="Malzemeler">
+    <h2 class="b-ribbon">İçine ne girsin?</h2>
+    <div class="d-grid" id="dTopList"></div>
+  </section>
+  <section class="d-panel d-right" id="dSides" aria-label="Yan ürünler">
+    <h2 class="b-ribbon">Yanına içecek?</h2>
+    <div class="d-grid" id="dSideList"></div>
+  </section>
+
+  <section class="b-boxwrap" aria-label="Dürüm tahtası">
+    <div class="b-box" id="dBox"></div>
+    <span class="b-sticker" id="dSticker" aria-hidden="true"></span>
+  </section>
+
+  <aside class="b-receipt" id="dReceipt" aria-label="Sipariş fişi">
+    <div class="b-paper">
+      <h2>HYDRO DÖNER</h2>
+      <p class="r-sub">USTASI SENSİN</p>
+      <hr>
+      <div id="dItems" aria-live="polite"></div>
+      <div class="r-line" id="dFeeLine" hidden><span>Teslimat</span><span id="dFee"></span></div>
+      <hr>
+      <div class="r-line r-total"><span>TOPLAM</span><strong id="dTotal"></strong></div>
+      <fieldset class="r-how">
+        <legend>Nasıl alacaksın?</legend>
+        <label data-press><input type="radio" name="dhow" value="pickup" checked><i></i> Gel-al</label>
+        <label data-press><input type="radio" name="dhow" value="delivery"><i></i> Teslimat</label>
+      </fieldset>
+      <button class="b-pill" id="dCheckout" type="button" data-press>Siparişi ver <span aria-hidden="true">↗</span></button>
+      <button class="b-back" id="dBack" type="button" data-press>← Dürümü aç</button>
+    </div>
+  </aside>
+
+  <aside class="b-done" id="dDone" aria-live="polite">
+    <svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="21" fill="none" stroke="currentColor" stroke-width="3"/><path d="M14 25l7 7 13-15" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <h2>Eline<br>sağlık usta.</h2>
+    <p class="lead" id="dDoneLead"></p>
+    <hr>
+    <p class="order-no" id="dDoneNo"></p>
+    <p class="arrive" id="dDoneArrive"></p>
+    <button class="b-pill" id="dAgain" type="button" data-press>Bir dürüm daha <span aria-hidden="true">↺</span></button>
+  </aside>
+
+  <div class="b-status" id="dStatus">
+    <span class="b-status-text" id="dStatusText"></span>
+    <span class="d-live" id="dLive"></span>
+    <button class="b-pill" id="dRoll" type="button" data-press>Dürümü sar <span aria-hidden="true">↗</span></button>
+    <button class="b-undo" id="dUndo" type="button" data-press>↺ Geri al</button>
+    <span class="b-toast" id="dToast" role="status"></span>
+  </div>
+</main>
+
+<div class="wipe" id="wipe" aria-hidden="true"><span></span></div>
+
+<canvas class="ghost" id="ghost" aria-hidden="true"></canvas>
+<div class="glove" id="glove" aria-hidden="true"></div>
+
+<script>
+/* Bir şey ters giderse boş ekranda kalma */
+window.__hydroFail = function (e) {
+  if (!document.documentElement.classList.contains('booting')) return;
+  document.documentElement.classList.remove('booting');
+  document.body.innerHTML = '<div style="position:fixed;inset:0;display:grid;place-items:center;background:#1b1716;color:#fff;font:18px system-ui;text-align:center;padding:24px"><div><b style="font-size:26px">Site açılamadı</b><p>Tarayıcın 3D grafiği (WebGL) çalıştıramıyor olabilir. Chrome veya Edge ile dene, donanım hızlandırmanın açık olduğundan emin ol.</p><small style="opacity:.6">' + String(e && e.message || e).replace(/</g, '&lt;') + '</small></div></div>';
+};
+addEventListener('error', function (ev) { window.__hydroFail(ev.error || ev.message); });
+</script>
+<script src="js/render.js"></script>
+<script src="js/render-burger.js"></script>
+<script src="js/glove.js"></script>
+<script src="js/app.js"></script>
+<script src="js/burger.js"></script>
+<script src="js/doner.js"></script>
+<script src="js/checkout.js"></script>
+<script src="js3d/bundle.js"></script>
+</body>
+</html>
